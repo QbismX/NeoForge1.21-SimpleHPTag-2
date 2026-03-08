@@ -24,6 +24,7 @@ import org.joml.Quaternionf;
 public class ModTagLayer<T extends LivingEntity, M extends EntityModel<T>> extends RenderLayer<T, M> {
 
 
+    private static final ResourceLocation ICONS = ResourceLocation.withDefaultNamespace("textures/particle/heart.png");
 
     public ModTagLayer(RenderLayerParent<T, M> renderer) {
         super(renderer);
@@ -123,7 +124,6 @@ public class ModTagLayer<T extends LivingEntity, M extends EntityModel<T>> exten
         font.drawInBatch(hp, x2, 10, 0xFF55FF55, false, matrix, buffer, Font.DisplayMode.NORMAL, 0, packedLight);
 
         // 画像も表示させたい
-        ResourceLocation ICONS = ResourceLocation.withDefaultNamespace("textures/particle/heart.png");
 
         RenderSystem.setShaderTexture(0, ICONS);
 
