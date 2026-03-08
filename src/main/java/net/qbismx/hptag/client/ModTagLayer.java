@@ -1,5 +1,6 @@
 package net.qbismx.hptag.client;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
@@ -12,13 +13,17 @@ import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityAttachment;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
+import net.qbismx.hptag.HPTag;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 
 public class ModTagLayer<T extends LivingEntity, M extends EntityModel<T>> extends RenderLayer<T, M> {
+
+
 
     public ModTagLayer(RenderLayerParent<T, M> renderer) {
         super(renderer);
@@ -93,7 +98,7 @@ public class ModTagLayer<T extends LivingEntity, M extends EntityModel<T>> exten
         float x1 = -font.width(name) / 2f;
         float x2 = -font.width(hp) / 2f;
 
-        int width = Math.max(font.width(name), font.width(hp));
+        int width = Math.max(font.width(name), font.width(hp) + 20);
         int height = 20; // 2行分
 
         // 後ろの背景(黒い四角)の設定
@@ -112,9 +117,34 @@ public class ModTagLayer<T extends LivingEntity, M extends EntityModel<T>> exten
         vc.addVertex(matrix, right, top, -0.01f).setColor(0,0,0,140);
         vc.addVertex(matrix, left, top, -0.01f).setColor(0,0,0,140);
 
+        matrix = poseStack.last().pose(); // 必要ないかもしれないが、念のための再取得
         // 文字の表示
         font.drawInBatch(name, x1, 0, 0xFFFFFFFF, false, matrix, buffer, Font.DisplayMode.NORMAL, 0, packedLight);
         font.drawInBatch(hp, x2, 10, 0xFF55FF55, false, matrix, buffer, Font.DisplayMode.NORMAL, 0, packedLight);
+
+        // 画像も表示させたい
+        ResourceLocation ICONS = ResourceLocation.withDefaultNamespace("textures/particle/heart.png");
+
+        RenderSystem.setShaderTexture(0, ICONS);
+
+        VertexConsumer vc2 = buffer.getBuffer(RenderType.text(ICONS));
+
+        float size = 8;
+        float x = x2 - 10; // HP文字の少し左
+        float y = 10;
+
+        float u0 = 0f;
+        float v0 = 0f;
+        float u1 = 1f;
+        float v1 = 1f;
+
+        Matrix4f pose = poseStack.last().pose();
+
+        vc2.addVertex(pose, x, y + size, 0).setUv(u0, v1).setColor(255,255,255,255).setLight(packedLight);
+        vc2.addVertex(pose, x + size, y + size, 0).setUv(u1, v1).setColor(255,255,255,255).setLight(packedLight);
+        vc2.addVertex(pose, x + size, y, 0).setUv(u1, v0).setColor(255,255,255,255).setLight(packedLight);
+        vc2.addVertex(pose, x, y, 0).setUv(u0, v0).setColor(255,255,255,255).setLight(packedLight);
+
 
         poseStack.popPose();
 
