@@ -41,7 +41,9 @@ public class ModTagLayer<T extends LivingEntity, M extends EntityModel<T>> exten
 
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null) return;
-        if(entity.distanceToSqr(mc.player) > 400) return;
+        // 処理を重くしないために制限を加える
+        if(!entity.hasLineOfSight(mc.player)) return; // 壁の向こうのmobのHPは表示させない
+        if(entity.distanceToSqr(mc.player) > 400) return; // 遠いところにいるmobのHPは表示させない
 
         renderTag(mc, entity, poseStack, buffer, packedLight, partialTick);
 
@@ -56,10 +58,6 @@ public class ModTagLayer<T extends LivingEntity, M extends EntityModel<T>> exten
 
         EntityRenderDispatcher dispatcher = mc.getEntityRenderDispatcher();
         Font font = mc.font;
-
-        double d0 = dispatcher.distanceToSqr(entity);
-
-        if (!net.neoforged.neoforge.client.ClientHooks.isNameplateInRenderDistance(entity, d0)) return;
 
         Vec3 vec3 = entity.getAttachments().getNullable(EntityAttachment.NAME_TAG, 0, entity.getViewYRot(partialTick));
 
